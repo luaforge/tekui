@@ -1,0 +1,30 @@
+
+= TODO =
+
+The scope of the current (alpha) release was determined by the
+smallest reasonable range of features needed for writing simple
+everyday applications. Chances are that the following issues need to
+be worked on:
+
+---------------------------------------------------------------------
+
+=== General ===
+
+ * Full internationalisation and localisation
+ * Bitmap graphics
+ * Individual style attributes
+ * Clipboard support
+ * Context menus
+ * Bubble help
+ * FloatText styling options
+ * Confinement of popup elements to the visible screen
+ * Eliminate occurences of float and double from the C library
+ * The TextInput gadget is quite unsatisfactory
+
+=== Known bugs ===
+
+ * potential memory leak in visual.drawimage
+ * rare visual artifacts in lists
+ * Antialiased fonts unsupported under X11 with Composite Extension
+ * Doubleclick timeout is incorrectly handled when using an
+ integer version of Lua

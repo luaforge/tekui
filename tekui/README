@@ -1,0 +1,647 @@
+
+== Table of contents ==
+
+ - 1. [[#about : About tekUI]]
+  - 1.1. [[#license : License]]
+  - 1.2. [[#status : Status, requirements]]
+  - 1.3. [[#development : Development model]]
+  - 1.4. [[#support : Support and services]]
+  - 1.5. [[#authors : Authors and contact]]
+
+ - 2. [[#overview : Technical overview]]
+  - 2.1. [[#features : Selected features]]
+  - 2.2. [[#plans : Plans for development and deployment]]
+  - 2.3. [[#themes : Themes]]
+  - 2.4. [[#clibrary : C library]]
+  - 2.5. [[#objectmodel : Lua, C and object model]]
+  - 2.6. [[#documentation : Documentation system]]
+
+ - 3. [[#buildinstall : Building and installing]]
+  - 3.1. [[#requirements : Requirements]]
+  - 3.2. [[#buildenv : Adjusting the build environment]]
+  - 3.3. [[#building : Building]]
+  - 3.4. [[#installation : Installation]]
+
+ - 4. [[#usersguide : tekUI user's guide]]
+  - 4.1. [[#helloworld : Hello, World!]]
+  - 4.2. [[#reactingoninput : Reacting on input]]
+  - 4.3. [[#adhocclasses : Ad-hoc setup of classes]]
+
+ - 5. [[#developersguide : tekUI developer's guide]]
+  - 5.1. [[#debug : Debug library]]
+  - 5.2. [[#proxied : Proxied object model]]
+  - 5.3. [[#classsetup : Class setup]]
+  - 5.4. [[#classdoc : Class documentation system]]
+
+ - 6. [[manual.html : tekUI reference manual]]
+
+---------------------------------------------------------------------
+
+=( about : 1. About tekUI )=
+
+tekUI is a small and freestanding graphical user interface (GUI)
+toolkit written in Lua and C. It was initially developed for the X
+Window System and can serve as a general-purpose GUI library for
+desktop applications.
+
+Its main focus is on rapid development of applications for
+custom-made devices, often with a custom appearance and under
+resource-constrained conditions, such as for embedded devices with a
+display controller.
+
+Being mostly written in the
+[[Lua scripting language][http://www.lua.org/]], it is easily
+extensible with new user interface elements, which can later be
+rewritten in C. The creation of new styles and themes and fitting the
+software to a new device are equally simple.
+
+See below for a more detailed technical [[#overview]].
+
+==( license : 1.1. License )==
+
+TekUI is free software under the same license as Lua itself: It can
+be used for both academic and commercial purposes at no cost, it
+qualifies as Open Source software and its license is compatible with
+the GPL. See [[copyright][copyright.html]].
+
+==( status : 1.2. Status, requirements )==
+
+TekUI is in alpha stage of development. It should compile and run out
+of the box on Linux and FreeBSD. Display drivers are available for
+X11 and [[DirectFB][http://www.directfb.org/]] (the latter being
+untested on FreeBSD). See also [[TODO][todo.html]] for a list of
+known bugs and missing features, and [[#requirements]] for a list of
+required packages.
+
+==( development :  1.3. Development model )==
+
+If you find this software useful, you have probably arranged to fit
+it to a certain device or application – submit your additions and we
+will check them for inclusion to the public source code repository.
+Regular developers are also welcome.
+
+==( support : 1.4. Support and services )==
+
+Vendors of commercial products can help advance the development by
+assigning projects based on tekUI. Support and services for the
+integration of tekUI as well as special versions, new display
+drivers, custom classes etc. are available from the authors – see
+below.
+
+==( authors : 1.5. Authors and contact )==
+
+Authors:
+ - Timm S. Müller <tmueller@schulze-mueller.de>
+ - Franciska Schulze <fschulze@schulze-mueller.de>
+
+Project website:
+ - http://tekui.teklib.org/
+
+Mailing list:
+ - http://lists.neoscientists.org/mailman/listinfo/tekui-devel
+
+Company website:
+ - http://www.schulze-mueller.de/
+
+---------------------------------------------------------------------
+
+=( overview : 2. Technical overview )=
+
+TekUI is not a binding to an existing GUI library, and it makes no
+attempt to conform to the looks of a host's native GUI (although this
+can be emulated to a certain degree – see below for details). The
+implementation comes straight to the point, and it is comparatively
+fast and resource-friendly, despite its script-heavy nature. Among
+the benefits for developers are its transparency and modularity; in
+particular, custom interface elements can be created with little
+effort. Note, however, that the programming interfaces are nowhere
+complete and fully stable yet, so be prepared for structural and API
+changes.
+
+==( features : 2.1. Selected features )==
+
+ * Automatic layouting and scalability, themes
+ * Font-sensitivity, support for antialiased fonts
+ * Full Unicode (UTF-8) support
+ * Allows for multi-windowed and fullscreen applications
+ * Fully incremental refresh logic, backbuffers are not required
+ * Concurrency thanks to inbuilt support for dispatching to
+ coroutines
+ * Supplied with a documentation system supporting tekUI's object
+ model
+ * Works with stock (double precision), single precision and
+ integer versions of the Lua VM
+
+=== Supported interface elements ===
+
+ * Canvas (smoothly scrolling)
+ * Checkmark
+ * Directory lister (file chooser included)
+ * Floating text
+ * Gauge
+ * Group (horizontal, vertical, grids, in pages, scrollable)
+ * Handle, for group balancing
+ * Image gadget (only vector images at the moment)
+ * List, also multi-column and multi-selection
+ * Menu (popup and window), also nested
+ * Popup item, also nested
+ * Popup list ('combo box')
+ * Radio button
+ * Slider
+ * Spacer
+ * Text gadget (and label), also multi-line
+ * Text input (single line)
+
+==( plans : 2.2. Plans for development and deployment )==
+
+The only language currently supported for writing applications in is
+Lua, and application programmers will have to use existing Lua
+modules or create their own C bindings for communicating with their
+host. (Fortunately, creating C bindings is an easy and
+well-documented task in Lua, and the tekUI package contains numerous
+examples.)
+
+Our next development target is to fold the tekUI framework into a
+freestanding C library, which enables applications to create
+asynchronous GUI objects, communicating with their main program
+using an application-level protocol. From this, we envision the
+following benefits:
+
+ * GUIs integrate smoothly even into I/O-burdened applications
+ (clients, servers)
+ * strict separation of GUI and functionality; the GUI runs in
+ a thread or process of its own
+ * Faulty GUI application code, as it is written in a safe language,
+ cannot corrupt the heap or otherwise crash the device, even if it
+ is without a MMU.
+
+Lua would continue to act as the toolkit's internal scripting
+language, which can be used for complex interconnections
+between GUI elements as well as simple application tasks.
+
+==( themes : 2.3. Themes )==
+
+The only admission to a more common appearance is that tekUI tries to
+import the color scheme found in a GTK+ configuration file. It can be
+conveniently created in the KDE configuration panel; thus, if you are
+using KDE and check the appropriate option, KDE, GTK+ and tekUI
+applications can all share the same color scheme.
+
+The current default theme tries to be as conservative and minimal as
+possible. Custom themes can be created by modifying (or deriving
+from) the Theme class.
+
+==( clibrary : 2.4. C library )==
+
+The C library is based on the [[TEKlib][http://www.teklib.org/]]
+middleware project. All required modules are contained in tekUI's
+source code distribution, to reduce the hassle of building and
+installing the software.
+
+The C library isolates from the host and provides a few
+performance-critical routines. Rendering and input handling are
+isolated in the form of display drivers, which allow for easy
+exchangeability. Display drivers currently supported are for X11 and
+[[DirectFB][http://www.directfb.org/]].
+
+Aside from the display driver interface, the C library features
+OS-like facilities such as portable threads and a timer device.
+Depending on your application and its kind of deployment, it can be
+extended with more input drivers, a virtual filesystem, file format
+codecs, etc.
+
+==( objectjmodel : 2.5. Lua, C and object model )==
+
+Regardless whether classes are written in Lua or C, they share a
+common, single-inheritance object model, which is determined by the
+Lua virtual machine and provides a referencing scheme and automatic
+memory management.
+
+Most user interface elements are currently implemented in Lua, which
+is beneficial for fast prototyping of custom classes and styles, and
+generally in early stages of development.
+
+==( documentation : 2.6. Documentation system )==
+
+TekUI comes with a documentation generator supporting its own object
+model. It is capable of generating a function reference and
+hierarchical class index from specially crafted comments in the
+source code. To regenerate the full documentation, invoke
+
+  # make docs
+
+Note that you need
+[[LuaFileSystem][http://www.keplerproject.org/luafilesystem/]] for
+the document generator to process the file system hierarchy.
+
+---------------------------------------------------------------------
+
+=( buildinstall : 3. Building and installing )=
+
+==( requirements : 3.1. Requirements )==
+
+Development libraries alongside with their tested versions (as of
+this writing) are given below:
+
+ * Lua-5.1.2
+ * libX11-1.1.3 (for the x11 driver)
+ * libXft-2.1.12 (for the x11 driver)
+ * fontconfig-2.5.0 (for the x11 driver)
+ * freetype-2.3.5 (for the x11 and dfb drivers)
+ * DirectFB-0.9.25.1 (for the dfb driver)
+
+LibXft and fontconfig are needed for building the x11 driver, but
+tekUI falls back to the core X11 API if they are unavailable at
+runtime. Additionally, for the
+[[DirList][manual.html#tek.ui.class.dirlist]] class to work, an
+installation of the
+[[LuaFileSystem][http://www.keplerproject.org/luafilesystem/]]
+package is needed.
+
+==( buildenv : 3.2. Adjusting the build environment )==
+
+This release has been tested on and should compile and run out of the
+box on
+
+ * Ubuntu Linux 7.10
+ * FreeBSD 7.0
+ * Gentoo Linux x86/2007.0, amd64/2006.0, amd64/2007.0
+
+If building fails for you, you have to adjust the build environment,
+which is located in the {{config}} file on the topmost directory
+level. Supported build tools are {{gmake}} (common under Linux) and
+{{pmake}} (common under FreeBSD).
+
+'''FreeBSD note''': You need a Lua interpreter which is linked with
+the {{-pthread}} option, as tekUI is using multithreaded code
+in shared libraries, which are dynamically loaded by the interpreter.
+
+==( building : 3.3. Building )==
+
+To see all build targets, type
+
+  # make help
+
+The regular build procedure is invoked with
+
+  # make all
+
+==( installation : 3.4. Installation )==
+
+Please note that for the x11 driver, a system-wide installation of
+tekUI is not strictly required. Once it is built, it can be worked
+with and developed against, as long as you stay in the top-level
+directory of the distribution. All required modules and classes will
+be found if programs are started from there, e.g.:
+
+  # bin/demo.lua
+
+If staying in the top-level directory is not desirable, then tekUI
+must be installed globally. (The same applies if the dfb driver is
+used, as its fonts and cursors will be searched only globally.)
+
+By default, the installation paths are
+
+ - {{/usr/local/lib/lua/5.1}}
+ - {{/usr/local/share/lua/5.1}}
+
+It is not unlikely that this is different from what is common for
+your operating system, distribution or development needs, so be sure
+to adjust these paths in the {{config}} file. The installation is
+conveniently invoked with
+
+  # sudo make install
+
+---------------------------------------------------------------------
+
+=( usersguide : 4. tekUI user's guide )=
+
+==( helloworld : 4.1. Hello, World! )==
+
+The GUI version of the "Hello, World!" program:
+
+  #/usr/bin/env lua
+  ui = require "tek.ui"
+  ui.Application:new
+  {
+    Children =
+    {
+      ui.Window:new
+      {
+        Title = "Hello",
+        Children =
+        {
+          ui.Text:new
+          {
+            Text = "_Hello, World!",
+            Style = "button",
+            Mode = "button",
+          },
+        },
+      },
+    },
+  }:run()
+
+As can be seen, tekUI allows a fully functional application to be
+written in a single nested expression. The
+[[manual.html#tek.ui : UI]] library comes with an on-demand class
+loader, so whenever a class (like
+[[manual.html#tek.ui.class.application : Application]],
+[[manual.html#tek.ui.class.window : Window]] or
+[[manual.html#tek.ui.class.text : Text]]) is accessed for the first
+time, it will be loaded from {{tek/ui/class/}} in the file system.
+
+Note that there is no button class in tekUI: a button is just a Text
+element behaving like a button with a frame giving it the appearance
+of a button. (We will later explain how you can write a button class
+yourself, to save you some typing.) Also note that by placing an
+underscore in front of a letter in its caption, we are creating a
+keyboard shortcut for the [[manual.html#tek.ui.class.text : Text]]
+element.
+
+To quit, press the window's close button or the Escape key – closing
+the [[manual.html#tek.ui.class.application : Application]]'s last
+open window will cause the {{run}} method to return to its caller.
+
+==( reactingoninput : 4.2. Reacting on input )==
+
+There are different ways for reacting to presses on the "Hello,
+World" button. The simplest method is to just place an {{onPress}}
+function into the Text object, which will overwrite the
+notification handler reacting on setting the {{Pressed}}
+variable. This variable is set to '''true''' when a
+[[manual.html#tek.ui.class.gadget : Gadget]] is getting activated,
+and to '''false''' when it is getting released:
+
+  #/usr/bin/env lua
+  ui = require "tek.ui"
+  ui.Application:new
+  {
+    Children =
+    {
+      ui.Window:new
+      {
+        Title = "Hello",
+        Children =
+        {
+          ui.Text:new
+          {
+            Text = "_Hello, World!",
+            Style = "button",
+            Mode = "button",
+            onPress = function(self, pressed)
+              if pressed == false then
+                print "Hello, World!"
+              end
+            end,
+          },
+        },
+      },
+    },
+  }:run()
+
+Another, more elobarate way is to equip the element with a
+notification handler yourself, which may look like this:
+
+  ...
+  ui.Text:new
+  {
+    Text = "_Hello, World!",
+    Style = "button",
+    Mode = "button",
+    Notifications =
+    {
+      ["Pressed"] =
+      {
+        [false] =
+        {
+          {
+            ui.NOTIFY_SELF,
+            ui.NOTIFY_FUNCTION,
+            function(self)
+              print "Hello, World!"
+            end,
+          },
+        },
+      },
+    },
+  },
+  ...
+
+Even though notification handlers can be written in the same
+expression as the rest of the application, we are now switching
+to a different setup style, because the deep levels of
+recursion are starting to interfere with clarity:
+
+  #/usr/bin/env lua
+  ui = require "tek.ui"
+  app = ui.Application:new()
+  win = ui.Window:new { Title = "Hello" }
+  text = ui.Text:new {
+    Text = "_Hello, World!",
+    Style = "button",
+    Mode = "button"
+  }
+  text:addNotify("Pressed", false, {
+    ui.NOTIFY_SELF,
+    ui.NOTIFY_FUNCTION,
+    function(self)
+      print "Hello, World!"
+    end
+  })
+  win:addMember(text)
+  app:addMember(win)
+  app:run()
+
+see also
+[[Object:addNotify][manual.html#Object:addNotify]] for details on
+notification handlers, and the
+[[manual.html#tek.ui.class.gadget : Gadget]] class for some of the
+possible actions to react on.
+
+==( adhocclasses : 4.3. Ad-hoc setup of classes )==
+
+To inherit properties and functionality from existing classes and to
+reuse existing code consequently, it is often desirable to create new
+classes yourself. There are different scopes in which new classes can
+be useful:
+
+ * Global classes are written as separate sources, located in the
+ system-wide installation path under {{tek/ui/class}} and set up
+ using a procedure as described in the [[#classsetup : class setup]]
+ section.
+
+ * Application classes are created in the same way, but they are
+ located in the application's local program directory (also under
+ {{tek/ui/class}}). They would also allow an application to be
+ shipped with modified versions of the standard classes, as the
+ application's local directory will be searched for classes first.
+
+ * Another scope is inside the source code of an existing application
+ or module. We might call this the 'ad-hoc' style, as new classes are
+ often created out of a spontaneous need.
+
+For the ad-hoc style, it is not necessary to create a new source.
+For example, to derive a button class from the Text class:
+
+  local Button = ui.Text:newClass { _NAME = "_button" }
+
+By convention, ad-hoc classes can be named arbitrarily, but their
+names should be prefixed with an underscore to distinguish them
+from global classes.
+
+From this point, the new class can be overridden, e.g. for
+initializations which turn a Text into a Button:
+
+  function Button.init(self)
+    self.Style = "button"
+    self.Mode = self.Mode or "button"
+    return ui.Text.init(self)
+  end
+
+As shown in the example, we also passed the call on to our
+superclass, which we expect to perform the missing initializations.
+
+Finally, a new object from our new class can be created:
+
+  button = Button:new { Text = "Hello, World!" }
+
+Also refer to the [[manual.html#tek.class : Class reference]] and
+the [[#classsetup : Class setup]] section for further information.
+
+---------------------------------------------------------------------
+
+=( developersguide : 5. tekUI developer's guide )=
+
+==( debug : 5.1. Debug library )==
+
+The debug library used throughout tekUI is
+[[tek.lib.debug][manual.html#tek.lib.debug]]. The default debug
+level is 10 ({{ERROR}}). To increase verbosity, set {{level}} to
+a lower value, either by modifying {{tek/lib/debug.lua}}, or by
+setting it after including the module:
+
+  db = require "tek.lib.debug"
+  db.level = db.INFO
+
+See also the module's documentation for redirecting the output.
+
+==( proxied : 5.2. Proxied object model )==
+
+If you plan on extending existing classes or develop your own, you
+should set the following configurable parameters in
+[[tek.class][manual.html#tek.class]], the base class of all tekUI
+classes:
+
+  local PROXY = true
+  local DEBUG = true
+
+The {{PROXY}} option allows for intercepting read/write accesses to
+objects, which will be harnessed by the {{DEBUG}} option for tracking
+accesses to uninitialized class members; so whenever a '''nil'''
+value is read from or written to an object, this causes {{tek.class}}
+to bail out with an error and a meaningful message.
+
+As a result, all member variables must be initialized during
+{{new()}} or {{init()}} – or more specifically, before the class
+metatable is attached and an object is becoming fully functional.
+This will assist in keeping variables neatly together, and you won't
+end up in a fluff of variables of limited scope and significance,
+getting initialized at random places. This also means that you cannot
+assign a distinct meaning to '''nil''' for a class member – you will
+have to use '''false''' instead, or find another arrangement. This
+convention of not using '''nil''' for class variables is found
+throughout the whole of the tekUI framework.
+
+Once your application is tested and ready for deployment, you can
+disable {{PROXY}}, as this will improve performance and reduce memory
+consumption.
+
+==( classsetup : 5.3. Class setup )==
+
+A class is usually set up in a prologue like this:
+
+  local Gadget = require "tek.ui.class.gadget"
+  module("tek.ui.class.button", tek.ui.class.gadget)
+  _VERSION = "Button Gadget 1.0"
+  local Button = _M
+
+The second argument to {{module}} is the super class to derive the
+new class from (see also [[tek.class][manual.html#tek.class]] for
+details on how this is supposed to work). By convention, we then put
+the module table (the class) into a local variable.
+
+Finally, methods in the newly created class may look like this (note
+that, thanks to the {{Button}} variable, the second example provides
+an implicit {{self}}):
+
+  function Button.new(class, self)
+    ...
+    return Gadget.new(class, self)
+  end
+
+  function Button:method()
+    ...
+    Gadget.method(self)
+  end
+
+Also, don't forget to add a {{_VERSION}} variable, as it will be used
+by the documentation system – see also the next section.
+
+==( classdoc : 5.4. Class documentation system )==
+
+Don't stray off too far from the class setup described in the
+previous section, as it contains valuable informations for tekUI's
+documentation generator.
+
+Most notably, the second argument to {{module}} should be written out
+in full – in the example above, one might be tempted to use
+{{Gadget}} instead of {{tek.ui.class.gadget}}; but then, the path
+information would be lost for the source code parser, which tries to
+assemble a self-contained class hierarchy from individual class /
+child class relations.
+
+=== Tokens for markup ===
+
+Aside from the aforementioned {{module}} and {{_VERSION}} keys (see
+section [[Class setup][#classsetup]]), the source code parser reacts
+on the following tokens.
+
+Long lines of dashes signify the beginnings and endings of comment
+blocks that are subject to processing
+[[markup notation][manual.html#tek.class.markup]], e.g.
+
+  ----------------------------------------------------------------
+  --  OVERVIEW::
+  --    Area - implements margins, layouting and drawing
+  ----------------------------------------------------------------
+
+The other condition that must be met for the following text to appear
+in the documentation is the recognition of either a definition (as
+seen in the example) or function marker inside such a comment block.
+The template for a definition is this:
+
+  DEFINITION::
+
+The function template:
+
+  ret1, ret2, ... = function(arg1, arg2, ...): ...
+
+The marker and the following text will then become part of the
+documentation. (In other words, by avoiding these markers, it is also
+possible to write comment blocks that do not show up in the
+documentation.)
+
+Functions inside classes will automatically receive a symbolic name
+as their class prefix (from assigning the module table {{_M}} to a
+local variable, see [[Class setup][#classsetup]]). Consecutively,
+they can be cross-referenced using the following notations:
+
+  Class:function()
+  Class.function()
+
+For further information, consult the sources in the
+[[class hierarchy][manual.html]] as examples, and the source code
+containing the
+[[markup notation reference][manual.html#tek.class.markup]], which
+can be found in {{tek.class.markup}}.

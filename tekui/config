@@ -1,0 +1,95 @@
+
+#------------------------------------------------------------------------------
+# Platform to build against [Choices: posix]
+#------------------------------------------------------------------------------
+
+PLATFORM ?= posix
+
+#------------------------------------------------------------------------------
+# Default display driver [Choices: x11, dfb]
+# For the DirectFB driver, also adjust src/Makefile and tek/lib/Makefile
+#------------------------------------------------------------------------------
+
+DISPLAY_DRIVER ?= x11
+
+#------------------------------------------------------------------------------
+# Installation paths:
+#------------------------------------------------------------------------------
+
+LUA_LIB = /usr/local/lib/lua/5.1
+LUA_SHARE = /usr/local/share/lua/5.1
+
+#------------------------------------------------------------------------------
+# Libraries:
+#------------------------------------------------------------------------------
+
+PLATFORM_LIBS = -pthread
+
+LUA_DEFS = -I/usr/local/include/lua51 -I/usr/include/lua5.1
+
+FREETYPE_DEFS = -I/usr/include/freetype2 -I/usr/X11R6/include/freetype2
+
+X11_LIBS = -L/usr/X11R6/lib -LX11 -lXext
+X11_DEFS = $(FREETYPE_DEFS) -D_XOPEN_SOURCE -I/usr/X11R6/include
+
+DFB_LIBS = `pkg-config --libs directfb`
+DFB_DEFS = $(FREETYPE_DEFS) `pkg-config --cflags directfb`
+
+#------------------------------------------------------------------------------
+# Paths:
+#------------------------------------------------------------------------------
+
+BASEDIR ?= .
+INCDIR = $(BASEDIR)/include
+LIBDIR = $(BASEDIR)/lib/$(PLATFORM)
+OBJDIR = build/$(PLATFORM)
+
+#------------------------------------------------------------------------------
+# Compiler flags:
+#------------------------------------------------------------------------------
+
+CC = gcc
+#DEBUG = -g -DTDEBUG=10
+WARN = -Wall -Wno-unused-parameter
+OPT = -O2
+INCL = -I. -Iinclude -I$(INCDIR)
+LIBCFLAGS = $(DEBUG) $(WARN) $(OPT) $(INCL) $(EXTRADEFS) -fpic
+MODCFLAGS = -shared -L $(LIBDIR)
+
+#------------------------------------------------------------------------------
+# Build tools:
+#------------------------------------------------------------------------------
+
+AR = ar r
+RM = rm
+RMDIR = rm -r
+MKDIR = mkdir -p
+ECHO = echo
+INSTALL = install
+
+#------------------------------------------------------------------------------
+# Predefined targets:
+#------------------------------------------------------------------------------
+
+default-help:
+	@echo "==============================================================================="
+	@echo "Default build targets:"
+	@echo "-------------------------------------------------------------------------------"
+	@echo "all ..................... build everything that is needed"
+	@echo "libs .................... build libraries"
+	@echo "modules ................. build shared objects"
+	@echo "install ................. install modules globally"
+	@echo "clean ................... delete temporary files"
+	@echo "help .................... show these and all extra targets for this Makefile"
+	@echo "==============================================================================="
+
+FORCE:
+
+$(BINDIR):
+	-$(MKDIR) $@
+$(MODDIR):
+	-$(MKDIR) $@
+$(LIBDIR):
+	-$(MKDIR) $@
+$(OBJDIR):
+	-$(MKDIR) $@
